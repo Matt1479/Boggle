@@ -1,4 +1,4 @@
-# https://www.geeksforgeeks.org/dsa/boggle-using-trie/
+# Inspired by https://www.geeksforgeeks.org/dsa/boggle-using-trie/
 # Time Complexity:  O(N*W + R*C^2)
 # Space Complexity: O(N*W + R*C)
 # N: len(words) in dictionary
