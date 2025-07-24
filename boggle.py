@@ -68,7 +68,7 @@ def search(board, word, length, i, j, rows, cols):
     return ans
 
 
-def word_boggle(board: list, rows, cols, words: list):
+def word_boggle(board: list, rows: int, cols: int, words: list, sorted=True):
     """Find words in board."""
 
     # Words in board
@@ -77,5 +77,8 @@ def word_boggle(board: list, rows, cols, words: list):
     for word in words:
         if exists(board, word, rows, cols):
             result.append(word)
+
+    if len(result) > 0 and sorted:
+        result.sort()
 
     return result
