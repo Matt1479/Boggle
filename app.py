@@ -1,11 +1,15 @@
 from flask import Flask, render_template
 import boggle
+import helpers
 
 # Configure application
 app = Flask(__name__)
 
 # Words in dictionary (of length >= 3)
 G_WORDS = boggle.load("static/dictionaries/large")
+
+# Boggle game content
+G_CONTENT = {}
 
 
 @app.after_request
@@ -20,7 +24,11 @@ def after_request(response):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+
+    # Generate board
+    content = helpers.generate_board(3, 3)
+
+    return render_template("index.html", content=content)
 
 
 @app.route("/dictionary")

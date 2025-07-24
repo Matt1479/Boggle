@@ -5,5 +5,23 @@
 {% endblock %}
 
 {% block main %}
-    <p>TODO</p>
+    <div class="row justify-content-center align-items-center">
+        <div class="col"></div>
+        <div class="col">
+            <div>
+
+                {% for i in range(content["rows"]) %}
+                    <div class="d-flex justify-content-center align-items-center flex-row">
+                        {% for j in range(content["cols"]) %}
+                            <span class="d-flex justify-content-center align-items-center border letter">
+                                {{ content["board"][i][j] }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+        <div class="col"></div>
+    </div>
 {% endblock %}
