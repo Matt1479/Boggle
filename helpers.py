@@ -1,27 +1,58 @@
 import random
 from string import ascii_uppercase, ascii_lowercase
 
-def generate_board(rows=4, cols=4, uppercase=True):
-    temp = {
-        "board": [],
+# Initialize pseudo-random number generator
+random.seed()
+
+VOWELS = {'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'}
+
+
+def count_vowels_consonants(board, rows, cols):
+    """Count the number of letters (vowels and consonants) in a board."""
+
+    letters = {"vowels": 0, "consonants": 0}
+
+    for i in range(rows):
+        for j in range(cols):
+            if board[i][j] in VOWELS:
+                letters["vowels"] += 1
+            else:
+                letters["consonants"] += 1
+
+    return letters
+
+
+def generate_board(rows=4, cols=4, uppercase=True, min_vowel_ratio=0.25):
+    """Generate a rows x cols board."""
+
+    while (True):
+
+        board = []
+
+        for i in range(rows):
+
+            row = []
+
+            for j in range(cols):
+
+                # Generate a pseudo-random uppercase or lowercase character
+                r = random.choice(ascii_uppercase if uppercase else ascii_lowercase)
+
+                # Append character to board
+                row.append(r)
+            
+            board.append(row)
+        
+        letters = count_vowels_consonants(board, rows, cols)
+
+        # Prevent division by 0
+        consonants = letters["consonants"] or 1
+        # Ensure there is at least (min_vowel_ratio * 100)% vowels
+        if (letters["vowels"] / consonants) >= min_vowel_ratio:
+            break
+
+    return {
+        "board": board,
         "rows": rows,
         "cols": cols
     }
-
-    # Initialize pseudo-random number generator
-    random.seed()
-
-    for i in range(rows):
-
-        # Append a list
-        temp["board"].append( [] )
-
-        for j in range(cols):
-
-            # Generate a pseudo-random uppercase or lowercase character
-            r = random.choice(ascii_uppercase if uppercase else ascii_lowercase)
-
-            # Append character to board
-            temp["board"][i].append(r)
-
-    return temp
