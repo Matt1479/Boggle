@@ -1,6 +1,7 @@
 async function main() {
-    const selectedElems = [];
+    let selectedElems = [];
     let wordsInBoard = null;
+    let wordsFound = [];
 
     // Generate board on click
     document.querySelector('#generateBoardBtn')
@@ -11,6 +12,11 @@ async function main() {
         // If board has content, reset it
         if (board.innerHTML) {
             board.innerHTML = '';
+            selectedElems = [];
+            wordsInBoard = null;
+            wordsFound = [];
+            document.querySelector('#wordsFound').innerHTML = '';
+            document.querySelector('#result').innerHTML = '';
         }
 
         for (let i = 0; i < content['rows']; i++) {
@@ -62,10 +68,36 @@ async function main() {
         }
 
         if (wordsInBoard.has(word)) {
-            console.log(`${word} is in board`);
+            const result = document.querySelector('#result');
+
+            if (wordsFound.includes(word)) {
+                result.innerHTML =
+                `<span class="fw-bold">
+                    You already found this word.
+                </span>`;
+            } else {
+                wordsFound.push(word);
+                
+                result.innerHTML =
+                `<span class="fw-bold">
+                    That's right, the board contains ${word}.
+                </span>`;
+    
+                document.querySelector('#wordsFound').innerHTML = wordsFound.join(', ');
+            }
         } else {
-            console.log(`${word} is NOT in board`);
+            document.querySelector('#result').innerHTML =
+            `<span class="fw-bold text-danger">
+                I'm afraid there is no such word as ${word} in this board.
+            </span>`;
         }
+        
+        // Reset
+        for (let i = 0; i < selectedElems.length; i++) {
+            selectedElems[i].classList.remove('selected');
+        }
+        selectedElems = [];
+        document.querySelector('#checkWordBtn').disabled = true;
     });
 }
 
