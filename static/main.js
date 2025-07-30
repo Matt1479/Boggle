@@ -1,5 +1,6 @@
 async function main() {
     const selectedElems = [];
+    let wordsInBoard = null;
 
     // Generate board on click
     document.querySelector('#generateBoardBtn')
@@ -32,14 +33,38 @@ async function main() {
                     } else {
                         selectedElems.splice(selectedElems.indexOf(spanCol), 1);
                     }
-            
-                    console.log(selectedElems);
+
+                    // Enable checking once we have 3 or more elements selected
+                    if (selectedElems.length >= 3) {
+                        document.querySelector('#checkWordBtn').disabled = false;
+                    } else {
+                        document.querySelector('#checkWordBtn').disabled = true;
+                    }
                 });
                 
                 divRow.appendChild(spanCol);
             }
 
             board.appendChild(divRow);
+            document.querySelector('#checkWordBtn').hidden = false;
+        }
+    });
+
+    // Check if word is in board
+    document.querySelector('#checkWordBtn')
+    .addEventListener('click', async function() {
+
+        let word = '';
+        selectedElems.forEach((selectedElem) => word += selectedElem.innerText);
+
+        if (!wordsInBoard) {
+            wordsInBoard = new Set(await getWordsInBoardFromAPI());
+        }
+
+        if (wordsInBoard.has(word)) {
+            console.log(`${word} is in board`);
+        } else {
+            console.log(`${word} is NOT in board`);
         }
     });
 }
