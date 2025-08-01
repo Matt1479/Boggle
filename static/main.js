@@ -9,7 +9,10 @@ const stateObj = {
     checkWordBtn: null,
     generateBoardBtn: null,
     wordsFoundParagraph: null,
-    resultDiv: null
+    resultDiv: null,
+
+    rows: 4,
+    cols: 4
 };
 
 async function main() {
@@ -25,86 +28,12 @@ async function main() {
     stateObj.resultDiv = document.querySelector('#result');
 
     // Generate board on click
-    stateObj.generateBoardBtn.addEventListener('click', async function() {
-        stateObj.board = document.querySelector('#board');
-        stateObj.content = await generateContentFromAPI(4, 4);
-
-        // If board has content, reset it
-        if (stateObj.board.innerHTML) {
-            stateObj.board.innerHTML = '';
-            stateObj.selectedElems = [];
-            stateObj.wordsInBoard = null;
-            stateObj.wordsFound = [];
-            stateObj.wordsFoundParagraph.innerHTML = '';
-            stateObj.resultDiv.innerHTML = '';
-        }
-
-        for (let i = 0; i < stateObj.content['rows']; i++) {
-
-            const divRow = document.createElement('div');
-            divRow.classList.add('d-flex', 'justify-content-center', 'align-items-center');
-
-            for (let j = 0; j < stateObj.content['cols']; j++) {
-
-                const spanCol = document.createElement('span');
-                spanCol.classList.add('d-flex', 'justify-content-center', 'align-items-center',
-                    'border', 'letter');
-                spanCol.textContent = stateObj.content['board'][i][j];
-
-                spanCol.dataset.row = i;
-                spanCol.dataset.col = j;
-
-                // Listen for click event on grid cells; toggle 'selected' class on click
-                spanCol.addEventListener('click', () => {
-
-                    const alreadySelected = spanCol.classList.contains('selected');
-
-                    if (alreadySelected) {
-                        // Allow deselection only of the last selected
-                        if (stateObj.selectedElems[stateObj.selectedElems.length - 1] == spanCol) {
-                            spanCol.classList.remove('selected');
-                            stateObj.selectedElems.pop();
-                        } else {
-                            stateObj.resultDiv.innerHTML =
-                            `<p class="fw-bold text-info">
-                                You can only deselect the last selected letter.
-                            </p>`;
-                        }
-                    } else {
-                        // First click is allowed unconditionally
-                        if (stateObj.selectedElems.length == 0) {
-                            spanCol.classList.add('selected');
-                            stateObj.selectedElems.push(spanCol);
-                        } else {
-                            const lastSelected = stateObj.selectedElems[stateObj.selectedElems.length - 1];
-                            if (isAdjacent(spanCol, lastSelected)) {
-                                spanCol.classList.add('selected');
-                                stateObj.selectedElems.push(spanCol);
-                            } else {
-                                // Not adjacent
-                                stateObj.resultDiv.innerHTML =
-                                `<p class="fw-bold text-info">
-                                    You can only select adjacent letters.
-                                </p>`;
-                            }
-                        }
-                    }
-
-                    // Enable/disable check button
-                    stateObj.checkWordBtn.disabled = stateObj.selectedElems.length < 3;
-                });
-                
-                divRow.appendChild(spanCol);
-            }
-
-            stateObj.board.appendChild(divRow);
-        }
-        
-        stateObj.checkWordBtn.hidden = false;
+    stateObj.generateBoardBtn.addEventListener('click', async function () {
+        await generateBoard();
     });
 
     // Check if word is in board
-    stateObj.checkWordBtn.addEventListener('click', async function() {
+    stateObj.checkWordBtn.addEventListener('click', async function () {
         // Immediataly disable to avoid successive calls/clicking
         stateObj.checkWordBtn.disabled = true;
 
@@ -120,23 +49,23 @@ async function main() {
 
             if (stateObj.wordsFound.includes(word)) {
                 result.innerHTML =
-                `<p class="fw-bold">
+                    `<p class="fw-bold">
                     You already found this word.
                 </p>`;
             } else {
                 stateObj.wordsFound.push(word);
-                
+
                 result.innerHTML =
-                `<p class="fw-bold">
+                    `<p class="fw-bold">
                     That's right, the board contains ${word}.
                 </p>`;
-    
+
                 stateObj.wordsFoundParagraph.innerHTML = stateObj.wordsFound.join(', ');
 
                 // Winning condition
                 if (stateObj.wordsFound.length == stateObj.wordsInBoard.size) {
-                    result.innerHTML += 
-                    `<p class="fw-bold text-success my-3">
+                    result.innerHTML +=
+                        `<p class="fw-bold text-success my-3">
                         You have found all the words!
                     </p>
                     <div class="my-3">
@@ -149,11 +78,11 @@ async function main() {
             }
         } else {
             stateObj.resultDiv.innerHTML =
-            `<p class="fw-bold text-info">
+                `<p class="fw-bold text-info">
                 I'm afraid there is no such word as ${word} in this board.
             </p>`;
         }
-        
+
         // Reset
         for (let i = 0; i < stateObj.selectedElems.length; i++) {
             stateObj.selectedElems[i].classList.remove('selected');
@@ -190,6 +119,97 @@ async function getWordsInBoardFromAPI() {
     } catch (error) {
         console.error(error.message);
     }
+}
+
+async function generateBoard() {
+    stateObj.board = document.querySelector('#board');
+    stateObj.content = await generateContentFromAPI(stateObj.rows, stateObj.cols);
+
+    if (!stateObj.content || !stateObj.board) {
+        stateObj.resultDiv.innerHTML = 
+        `<p class="text-danger">
+            Failed to generate board. Try again.
+        </p>`;
+        return;
+    }
+
+    // If board has content, reset it
+    if (stateObj.board.innerHTML.trim()) {
+        resetBoardState();
+    }
+
+    for (let i = 0; i < stateObj.content['rows']; i++) {
+
+        const divRow = document.createElement('div');
+        divRow.classList.add('d-flex', 'justify-content-center', 'align-items-center');
+
+        for (let j = 0; j < stateObj.content['cols']; j++) {
+
+            const spanCol = document.createElement('span');
+            spanCol.classList.add('d-flex', 'justify-content-center', 'align-items-center',
+                'border', 'letter');
+            spanCol.textContent = stateObj.content['board'][i][j];
+
+            spanCol.dataset.row = i;
+            spanCol.dataset.col = j;
+
+            // Listen for click event on grid cells; toggle 'selected' class on click
+            spanCol.addEventListener('click', () => {
+
+                const alreadySelected = spanCol.classList.contains('selected');
+
+                if (alreadySelected) {
+                    // Allow deselection only of the last selected
+                    if (stateObj.selectedElems[stateObj.selectedElems.length - 1] == spanCol) {
+                        spanCol.classList.remove('selected');
+                        stateObj.selectedElems.pop();
+                    } else {
+                        stateObj.resultDiv.innerHTML =
+                            `<p class="fw-bold text-info">
+                                You can only deselect the last selected letter.
+                            </p>`;
+                    }
+                } else {
+                    // First click is allowed unconditionally
+                    if (stateObj.selectedElems.length == 0) {
+                        spanCol.classList.add('selected');
+                        stateObj.selectedElems.push(spanCol);
+                    } else {
+                        const lastSelected = stateObj.selectedElems[stateObj.selectedElems.length - 1];
+                        if (isAdjacent(spanCol, lastSelected)) {
+                            spanCol.classList.add('selected');
+                            stateObj.selectedElems.push(spanCol);
+                        } else {
+                            // Not adjacent
+                            stateObj.resultDiv.innerHTML =
+                                `<p class="fw-bold text-info">
+                                    You can only select adjacent letters.
+                                </p>`;
+                        }
+                    }
+                }
+
+                // Enable/disable check button
+                stateObj.checkWordBtn.disabled = stateObj.selectedElems.length < 3;
+            });
+
+            divRow.appendChild(spanCol);
+        }
+
+        stateObj.board.appendChild(divRow);
+    }
+
+    stateObj.checkWordBtn.hidden = false;
+}
+
+function resetBoardState() {
+    stateObj.board.innerHTML = '';
+    stateObj.selectedElems = [];
+    stateObj.wordsInBoard = null;
+    stateObj.wordsFound = [];
+    stateObj.wordsFoundParagraph.innerHTML = '';
+    stateObj.resultDiv.innerHTML = '';
+    stateObj.checkWordBtn.disabled = true;
 }
 
 function isAdjacent(a, b) {
