@@ -59,6 +59,8 @@ async function main() {
     // Check if word is in board
     document.querySelector('#checkWordBtn')
     .addEventListener('click', async function() {
+        // Immediataly disable to avoid successive calls/clicking
+        document.querySelector('#checkWordBtn').disabled = true;
 
         let word = '';
         selectedElems.forEach((selectedElem) => word += selectedElem.innerText);
@@ -72,24 +74,38 @@ async function main() {
 
             if (wordsFound.includes(word)) {
                 result.innerHTML =
-                `<span class="fw-bold">
+                `<p class="fw-bold">
                     You already found this word.
-                </span>`;
+                </p>`;
             } else {
                 wordsFound.push(word);
                 
                 result.innerHTML =
-                `<span class="fw-bold">
+                `<p class="fw-bold">
                     That's right, the board contains ${word}.
-                </span>`;
+                </p>`;
     
                 document.querySelector('#wordsFound').innerHTML = wordsFound.join(', ');
+
+                // Winning condition
+                if (wordsFound.length == wordsInBoard.size) {
+                    result.innerHTML += 
+                    `<p class="fw-bold text-success my-3">
+                        You have found all the words!
+                    </p>
+                    <div class="my-3">
+                        <button class="btn btn-success" onclick="window.location.reload()">
+                            Restart
+                        </button>
+                    </div>
+                    `;
+                }
             }
         } else {
             document.querySelector('#result').innerHTML =
-            `<span class="fw-bold text-danger">
+            `<p class="fw-bold text-danger">
                 I'm afraid there is no such word as ${word} in this board.
-            </span>`;
+            </p>`;
         }
         
         // Reset
@@ -97,7 +113,6 @@ async function main() {
             selectedElems[i].classList.remove('selected');
         }
         selectedElems = [];
-        document.querySelector('#checkWordBtn').disabled = true;
     });
 }
 
