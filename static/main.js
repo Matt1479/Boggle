@@ -11,6 +11,8 @@ const stateObj = {
     wordsFoundParagraph: null,
     resultDiv: null,
 
+    confirmModal: null,
+
     rows: 4,
     cols: 4
 };
@@ -27,9 +29,23 @@ async function main() {
     stateObj.wordsFoundParagraph = document.querySelector('#wordsFound');
     stateObj.resultDiv = document.querySelector('#result');
 
+    // Initialize/instantiate modal
+    stateObj.confirmModal = new bootstrap.Modal('#confirmModal');
+
+    // Attach event listener to modal confirm button
+    document.querySelector('#confirmBtn').addEventListener('click', async () => {
+        stateObj.confirmModal.hide();
+        await generateBoard();
+    });
+
     // Generate board on click
     stateObj.generateBoardBtn.addEventListener('click', async function () {
-        await generateBoard();
+        stateObj.board = document.querySelector('#board');
+        if (board.innerHTML.trim()) {
+            stateObj.confirmModal.show();
+        } else {
+            await generateBoard();
+        }
     });
 
     // Check if word is in board
