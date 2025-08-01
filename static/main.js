@@ -1,40 +1,55 @@
+const stateObj = {
+    selectedElems: null,
+    wordsFound: null,
+    wordsInBoard: null,
+
+    board: null,
+    content: null,
+
+    checkWordBtn: null,
+    generateBoardBtn: null,
+    wordsFoundParagraph: null,
+    resultDiv: null
+};
+
 async function main() {
-    let selectedElems = [];
-    let wordsInBoard = null;
-    let wordsFound = [];
+    // Initialize fields
+    stateObj.selectedElems = [];
+    stateObj.wordsInBoard = null;
+    stateObj.wordsFound = [];
 
     // Get reference to elements (i.e. buttons and divs)
-    const checkWordBtn = document.querySelector('#checkWordBtn');
-    const generateBoardBtn = document.querySelector('#generateBoardBtn');
-    const wordsFoundParagraph = document.querySelector('#wordsFound');
-    const resultDiv = document.querySelector('#result');
+    stateObj.checkWordBtn = document.querySelector('#checkWordBtn');
+    stateObj.generateBoardBtn = document.querySelector('#generateBoardBtn');
+    stateObj.wordsFoundParagraph = document.querySelector('#wordsFound');
+    stateObj.resultDiv = document.querySelector('#result');
 
     // Generate board on click
-    generateBoardBtn.addEventListener('click', async function() {
-        const board = document.querySelector('#board');
-        const content = await generateContentFromAPI(4, 4);
+    stateObj.generateBoardBtn.addEventListener('click', async function() {
+        stateObj.board = document.querySelector('#board');
+        stateObj.content = await generateContentFromAPI(4, 4);
 
         // If board has content, reset it
-        if (board.innerHTML) {
-            board.innerHTML = '';
-            selectedElems = [];
-            wordsInBoard = null;
-            wordsFound = [];
-            wordsFoundParagraph.innerHTML = '';
-            resultDiv.innerHTML = '';
+        if (stateObj.board.innerHTML) {
+            stateObj.board.innerHTML = '';
+            stateObj.selectedElems = [];
+            stateObj.wordsInBoard = null;
+            stateObj.wordsFound = [];
+            stateObj.wordsFoundParagraph.innerHTML = '';
+            stateObj.resultDiv.innerHTML = '';
         }
 
-        for (let i = 0; i < content['rows']; i++) {
+        for (let i = 0; i < stateObj.content['rows']; i++) {
 
             const divRow = document.createElement('div');
             divRow.classList.add('d-flex', 'justify-content-center', 'align-items-center');
 
-            for (let j = 0; j < content['cols']; j++) {
+            for (let j = 0; j < stateObj.content['cols']; j++) {
 
                 const spanCol = document.createElement('span');
                 spanCol.classList.add('d-flex', 'justify-content-center', 'align-items-center',
                     'border', 'letter');
-                spanCol.textContent = content['board'][i][j];
+                spanCol.textContent = stateObj.content['board'][i][j];
 
                 spanCol.dataset.row = i;
                 spanCol.dataset.col = j;
@@ -46,79 +61,80 @@ async function main() {
 
                     if (alreadySelected) {
                         // Allow deselection only of the last selected
-                        if (selectedElems[selectedElems.length - 1] == spanCol) {
+                        if (stateObj.selectedElems[stateObj.selectedElems.length - 1] == spanCol) {
                             spanCol.classList.remove('selected');
-                            selectedElems.pop();
+                            stateObj.selectedElems.pop();
                         } else {
-                            resultDiv.innerHTML =
+                            stateObj.resultDiv.innerHTML =
                             `<p class="fw-bold text-info">
-                                You can only only deselect the last selected letter.
+                                You can only deselect the last selected letter.
                             </p>`;
                         }
                     } else {
                         // First click is allowed unconditionally
-                        if (selectedElems.length == 0) {
+                        if (stateObj.selectedElems.length == 0) {
                             spanCol.classList.add('selected');
-                            selectedElems.push(spanCol);
+                            stateObj.selectedElems.push(spanCol);
                         } else {
-                            const lastSelected = selectedElems[selectedElems.length - 1];
+                            const lastSelected = stateObj.selectedElems[stateObj.selectedElems.length - 1];
                             if (isAdjacent(spanCol, lastSelected)) {
                                 spanCol.classList.add('selected');
-                                selectedElems.push(spanCol);
+                                stateObj.selectedElems.push(spanCol);
                             } else {
                                 // Not adjacent
-                                resultDiv.innerHTML =
+                                stateObj.resultDiv.innerHTML =
                                 `<p class="fw-bold text-info">
-                                    You can only only select adjacent letters.
+                                    You can only select adjacent letters.
                                 </p>`;
                             }
                         }
                     }
 
                     // Enable/disable check button
-                    checkWordBtn.disabled = selectedElems.length < 3;
+                    stateObj.checkWordBtn.disabled = stateObj.selectedElems.length < 3;
                 });
                 
                 divRow.appendChild(spanCol);
             }
 
-            board.appendChild(divRow);
-            checkWordBtn.hidden = false;
+            stateObj.board.appendChild(divRow);
         }
+        
+        stateObj.checkWordBtn.hidden = false;
     });
 
     // Check if word is in board
-    checkWordBtn.addEventListener('click', async function() {
+    stateObj.checkWordBtn.addEventListener('click', async function() {
         // Immediataly disable to avoid successive calls/clicking
-        checkWordBtn.disabled = true;
+        stateObj.checkWordBtn.disabled = true;
 
         let word = '';
-        selectedElems.forEach((selectedElem) => word += selectedElem.innerText);
+        stateObj.selectedElems.forEach((selectedElem) => word += selectedElem.innerText);
 
-        if (!wordsInBoard) {
-            wordsInBoard = new Set(await getWordsInBoardFromAPI());
+        if (!stateObj.wordsInBoard) {
+            stateObj.wordsInBoard = new Set(await getWordsInBoardFromAPI());
         }
 
-        if (wordsInBoard.has(word)) {
-            const result = resultDiv;
+        if (stateObj.wordsInBoard.has(word)) {
+            const result = stateObj.resultDiv;
 
-            if (wordsFound.includes(word)) {
+            if (stateObj.wordsFound.includes(word)) {
                 result.innerHTML =
                 `<p class="fw-bold">
                     You already found this word.
                 </p>`;
             } else {
-                wordsFound.push(word);
+                stateObj.wordsFound.push(word);
                 
                 result.innerHTML =
                 `<p class="fw-bold">
                     That's right, the board contains ${word}.
                 </p>`;
     
-                wordsFoundParagraph.innerHTML = wordsFound.join(', ');
+                stateObj.wordsFoundParagraph.innerHTML = stateObj.wordsFound.join(', ');
 
                 // Winning condition
-                if (wordsFound.length == wordsInBoard.size) {
+                if (stateObj.wordsFound.length == stateObj.wordsInBoard.size) {
                     result.innerHTML += 
                     `<p class="fw-bold text-success my-3">
                         You have found all the words!
@@ -132,17 +148,17 @@ async function main() {
                 }
             }
         } else {
-            resultDiv.innerHTML =
+            stateObj.resultDiv.innerHTML =
             `<p class="fw-bold text-info">
                 I'm afraid there is no such word as ${word} in this board.
             </p>`;
         }
         
         // Reset
-        for (let i = 0; i < selectedElems.length; i++) {
-            selectedElems[i].classList.remove('selected');
+        for (let i = 0; i < stateObj.selectedElems.length; i++) {
+            stateObj.selectedElems[i].classList.remove('selected');
         }
-        selectedElems = [];
+        stateObj.selectedElems = [];
     });
 }
 
