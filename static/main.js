@@ -31,7 +31,7 @@ async function main() {
                     'border', 'letter');
                 spanCol.textContent = content['board'][i][j];
 
-                // Listen for click even on grid cells; toggle 'selected' class on click
+                // Listen for click event on grid cells; toggle 'selected' class on click
                 spanCol.addEventListener('click', () => {
                     spanCol.classList.toggle('selected');
                     if (spanCol.classList.contains('selected')) {
