@@ -3,9 +3,14 @@ async function main() {
     let wordsInBoard = null;
     let wordsFound = [];
 
+    // Get reference to elements (i.e. buttons and divs)
+    const checkWordBtn = document.querySelector('#checkWordBtn');
+    const generateBoardBtn = document.querySelector('#generateBoardBtn');
+    const wordsFoundParagraph = document.querySelector('#wordsFound');
+    const resultDiv = document.querySelector('#result');
+
     // Generate board on click
-    document.querySelector('#generateBoardBtn')
-    .addEventListener('click', async function() {
+    generateBoardBtn.addEventListener('click', async function() {
         const board = document.querySelector('#board');
         const content = await generateContentFromAPI(4, 4);
 
@@ -15,8 +20,8 @@ async function main() {
             selectedElems = [];
             wordsInBoard = null;
             wordsFound = [];
-            document.querySelector('#wordsFound').innerHTML = '';
-            document.querySelector('#result').innerHTML = '';
+            wordsFoundParagraph.innerHTML = '';
+            resultDiv.innerHTML = '';
         }
 
         for (let i = 0; i < content['rows']; i++) {
@@ -45,7 +50,7 @@ async function main() {
                             spanCol.classList.remove('selected');
                             selectedElems.pop();
                         } else {
-                            document.querySelector('#result').innerHTML =
+                            resultDiv.innerHTML =
                             `<p class="fw-bold text-info">
                                 You can only only deselect the last selected letter.
                             </p>`;
@@ -62,7 +67,7 @@ async function main() {
                                 selectedElems.push(spanCol);
                             } else {
                                 // Not adjacent
-                                document.querySelector('#result').innerHTML =
+                                resultDiv.innerHTML =
                                 `<p class="fw-bold text-info">
                                     You can only only select adjacent letters.
                                 </p>`;
@@ -71,22 +76,21 @@ async function main() {
                     }
 
                     // Enable/disable check button
-                    document.querySelector('#checkWordBtn').disabled = selectedElems.length < 3;
+                    checkWordBtn.disabled = selectedElems.length < 3;
                 });
                 
                 divRow.appendChild(spanCol);
             }
 
             board.appendChild(divRow);
-            document.querySelector('#checkWordBtn').hidden = false;
+            checkWordBtn.hidden = false;
         }
     });
 
     // Check if word is in board
-    document.querySelector('#checkWordBtn')
-    .addEventListener('click', async function() {
+    checkWordBtn.addEventListener('click', async function() {
         // Immediataly disable to avoid successive calls/clicking
-        document.querySelector('#checkWordBtn').disabled = true;
+        checkWordBtn.disabled = true;
 
         let word = '';
         selectedElems.forEach((selectedElem) => word += selectedElem.innerText);
@@ -96,7 +100,7 @@ async function main() {
         }
 
         if (wordsInBoard.has(word)) {
-            const result = document.querySelector('#result');
+            const result = resultDiv;
 
             if (wordsFound.includes(word)) {
                 result.innerHTML =
@@ -111,7 +115,7 @@ async function main() {
                     That's right, the board contains ${word}.
                 </p>`;
     
-                document.querySelector('#wordsFound').innerHTML = wordsFound.join(', ');
+                wordsFoundParagraph.innerHTML = wordsFound.join(', ');
 
                 // Winning condition
                 if (wordsFound.length == wordsInBoard.size) {
@@ -128,7 +132,7 @@ async function main() {
                 }
             }
         } else {
-            document.querySelector('#result').innerHTML =
+            resultDiv.innerHTML =
             `<p class="fw-bold text-info">
                 I'm afraid there is no such word as ${word} in this board.
             </p>`;
