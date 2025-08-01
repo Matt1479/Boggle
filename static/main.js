@@ -11,8 +11,7 @@ const stateObj = {
     wordsFoundParagraph: null,
     resultDiv: null,
 
-    generateModal: null,
-    dimensionsModal: null,
+    confirmModal: null,
 
     rows: 4,
     cols: 4
@@ -30,46 +29,22 @@ async function main() {
     stateObj.wordsFoundParagraph = document.querySelector('#wordsFound');
     stateObj.resultDiv = document.querySelector('#result');
 
-    // Initialize/instantiate modals
-    stateObj.generateModal = new bootstrap.Modal('#generateModal');
-    stateObj.dimensionsModal = new bootstrap.Modal('#dimensionsModal');
+    // Initialize/instantiate modal
+    stateObj.confirmModal = new bootstrap.Modal('#confirmModal');
 
-    // Attach event listener to confirm generate modal button
-    document.querySelector('#confirmGenerateModalBtn').addEventListener('click', async () => {
-        stateObj.generateModal.hide();
-        await generateBoard();
-    });
-
-    // Attach event listener to confirm dimensions modal button
-    document.querySelector('#confirmDimensionsModalBtn').addEventListener('click', async () => {
-        // Get values of inputs
-        const rows = parseInt(document.querySelector('#rowsInput').value);
-        const cols = parseInt(document.querySelector('#colsInput').value);
-
-        // Validate inputs
-        if (rows < 2 || cols < 2 || rows > 10 || cols > 10 || rows != cols) {
-            alert("Rows and Columns must be between 2 and 10 and be equal to each other.");
-            return;
-        }
-
-        // Store values in state
-        stateObj.rows = rows;
-        stateObj.cols = cols;
-
-        stateObj.dimensionsModal.hide();
-        
+    // Attach event listener to modal confirm button
+    document.querySelector('#confirmBtn').addEventListener('click', async () => {
+        stateObj.confirmModal.hide();
         await generateBoard();
     });
 
     // Generate board on click
     stateObj.generateBoardBtn.addEventListener('click', async function () {
         stateObj.board = document.querySelector('#board');
-        if (stateObj.board.innerHTML.trim()) {
-            // Board already has content - show generate modal
-            stateObj.generateModal.show();
+        if (board.innerHTML.trim()) {
+            stateObj.confirmModal.show();
         } else {
-            // Board does not yet have content - grab dimensions from player
-            stateObj.dimensionsModal.show();
+            await generateBoard();
         }
     });
 
