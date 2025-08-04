@@ -33,3 +33,7 @@ nav .navbar-brand .green {
 .selected {
     background-color: #3f474f;
 }
+
+.word:hover {
+    background-color: #3f474f;
+}

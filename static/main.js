@@ -11,6 +11,11 @@ const stateObj = {
     wordsFoundElem: null,
     resultElem: null,
 
+    wordsElem: null,
+
+    displayElem: null,
+    displayBtn: null,
+
     generateModalElem: null,
     dimensionsModalElem: null,
 
@@ -31,6 +36,9 @@ async function main() {
     stateObj.generateBoardBtn = document.querySelector('#generateBoardBtn');
     stateObj.wordsFoundElem = document.querySelector('#wordsFound');
     stateObj.resultElem = document.querySelector('#result');
+    stateObj.displayElem = document.querySelector('#display');
+    stateObj.displayBtn = document.querySelector('#display > button');
+    stateObj.wordsElem = document.querySelector('#words');
 
     // Initialize/instantiate modals
     stateObj.generateModalElem = new bootstrap.Modal('#generateModal');
@@ -123,6 +131,61 @@ async function main() {
         }
         stateObj.selectedElems = [];
     });
+
+    stateObj.displayBtn.addEventListener('click', async () => {
+        // Immediataly disable to avoid successive calls/clicking
+        stateObj.displayBtn.disabled = true;
+        if (!stateObj.wordsInBoard) {
+            stateObj.wordsInBoard = new Set(await getWordsInBoardFromAPI());
+        }
+
+        // When done fetching change display text and toggle the button
+        if (stateObj.displayBtn.innerText == 'Display all words') {
+            if (!stateObj.wordsElem.innerHTML.trim()) {
+                const wordMap = new Map();
+    
+                // Group words by length
+                for (const word of stateObj.wordsInBoard) {
+                    const len = word.length;
+                    if (!wordMap.has(len)) {
+                        wordMap.set(len, []);
+                    }
+                    wordMap.get(len).push(word);
+                }
+    
+                // Create DOM structure
+                for (const [length, words] of [...wordMap.entries()]) {
+                    const groupContainer = document.createElement('div');
+                    groupContainer.classList.add('row', 'mb-3');
+    
+                    const title = document.createElement('h4');
+                    title.textContent = `${length} letter`;
+                    title.classList.add('fs-2', 'text-start');
+    
+                    groupContainer.appendChild(title);
+    
+                    words.sort().forEach((word) => {
+                        const a = document.createElement('a');
+                        a.textContent = word.at(0).toUpperCase() + word.slice(1).toLowerCase();
+                        a.classList.add('word', 'w-auto', 'btn', 'mx-1');
+                        // a.href = `/dictionary?word=${word}`;
+
+                        groupContainer.appendChild(a); 
+                    });
+
+                    stateObj.wordsElem.appendChild(groupContainer);
+                }
+            }
+
+            stateObj.wordsElem.hidden = false;
+            stateObj.displayBtn.innerText = 'Hide all words';
+        } else {
+            stateObj.wordsElem.hidden = true;
+            stateObj.displayBtn.innerText = 'Display all words';
+        }
+
+        stateObj.displayBtn.disabled = false;
+    });
 }
 
 async function generateBoard() {
@@ -195,6 +258,7 @@ async function generateBoard() {
     }
 
     stateObj.checkWordBtn.hidden = false;
+    stateObj.displayElem.hidden = false;
 }
 
 async function generateContentFromAPI(rows, cols) {
@@ -208,7 +272,6 @@ async function generateContentFromAPI(rows, cols) {
         const json = await response.json();
         return json;
     } catch (error) {
-        console.error(error.message);
         showResultMessage('Could not fetch data from API.', 'text-danger');
     }
 }
@@ -250,6 +313,10 @@ function resetBoardState() {
     stateObj.wordsFoundElem.innerHTML = '';
     stateObj.resultElem.innerHTML = '';
     stateObj.checkWordBtn.disabled = true;
+    stateObj.displayBtn.innerText = 'Display all words';
+    stateObj.displayBtn.disabled = false;
+    stateObj.wordsElem.hidden = true;
+    stateObj.wordsElem.innerHTML = '';
 }
 
 function showResultMessage(message, classes='text-info') {
