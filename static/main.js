@@ -8,14 +8,16 @@ const stateObj = {
 
     checkWordBtn: null,
     generateBoardBtn: null,
-    wordsFoundParagraph: null,
-    resultDiv: null,
+    wordsFoundElem: null,
+    resultElem: null,
 
-    generateModal: null,
-    dimensionsModal: null,
+    generateModalElem: null,
+    dimensionsModalElem: null,
 
     rows: 4,
-    cols: 4
+    cols: 4,
+
+    minWordLength: 3
 };
 
 async function main() {
@@ -27,16 +29,16 @@ async function main() {
     // Get reference to elements (i.e. buttons and divs)
     stateObj.checkWordBtn = document.querySelector('#checkWordBtn');
     stateObj.generateBoardBtn = document.querySelector('#generateBoardBtn');
-    stateObj.wordsFoundParagraph = document.querySelector('#wordsFound');
-    stateObj.resultDiv = document.querySelector('#result');
+    stateObj.wordsFoundElem = document.querySelector('#wordsFound');
+    stateObj.resultElem = document.querySelector('#result');
 
     // Initialize/instantiate modals
-    stateObj.generateModal = new bootstrap.Modal('#generateModal');
-    stateObj.dimensionsModal = new bootstrap.Modal('#dimensionsModal');
+    stateObj.generateModalElem = new bootstrap.Modal('#generateModal');
+    stateObj.dimensionsModalElem = new bootstrap.Modal('#dimensionsModal');
 
     // Attach event listener to confirm generate modal button
     document.querySelector('#confirmGenerateModalBtn').addEventListener('click', async () => {
-        stateObj.generateModal.hide();
+        stateObj.generateModalElem.hide();
         await generateBoard();
     });
 
@@ -56,7 +58,7 @@ async function main() {
         stateObj.rows = rows;
         stateObj.cols = cols;
 
-        stateObj.dimensionsModal.hide();
+        stateObj.dimensionsModalElem.hide();
         
         await generateBoard();
     });
@@ -65,11 +67,11 @@ async function main() {
     stateObj.generateBoardBtn.addEventListener('click', async function () {
         stateObj.board = document.querySelector('#board');
         if (stateObj.board.innerHTML.trim()) {
-            // Generate new board board (if player agrees)
-            stateObj.generateModal.show();
+            // Generate new board (if player agrees)
+            stateObj.generateModalElem.show();
         } else {
             // Grab dimensions for board from player
-            stateObj.dimensionsModal.show();
+            stateObj.dimensionsModalElem.show();
         }
     });
 
@@ -81,35 +83,29 @@ async function main() {
         let word = '';
         stateObj.selectedElems.forEach((selectedElem) => word += selectedElem.innerText);
 
+        if (word.length < stateObj.minWordLength) {
+            showResultMessage(`Words must be at least ${stateObj.minWordLength} letters long.`);
+            return;
+        }
+
         if (!stateObj.wordsInBoard) {
             stateObj.wordsInBoard = new Set(await getWordsInBoardFromAPI());
         }
 
         if (stateObj.wordsInBoard.has(word)) {
-            const result = stateObj.resultDiv;
-
             if (stateObj.wordsFound.includes(word)) {
-                result.innerHTML =
-                    `<p class="fw-bold">
-                    You already found this word.
-                </p>`;
+                showResultMessage('You already found this word.');
             } else {
                 stateObj.wordsFound.push(word);
+                showResultMessage(`That's right, the board contains ${word}.`);
 
-                result.innerHTML =
-                    `<p class="fw-bold">
-                    That's right, the board contains ${word}.
-                </p>`;
-
-                stateObj.wordsFoundParagraph.innerHTML = stateObj.wordsFound.join(', ');
+                stateObj.wordsFoundElem.innerHTML = stateObj.wordsFound.join(', ');
 
                 // Winning condition
                 if (stateObj.wordsFound.length == stateObj.wordsInBoard.size) {
-                    result.innerHTML +=
-                        `<p class="fw-bold text-success my-3">
-                        You have found all the words!
-                    </p>
-                    <div class="my-3">
+                    showResultMessage(`You have found all the words!`);
+                    stateObj.resultElem.innerHTML +=
+                    `<div class="my-3">
                         <button class="btn btn-success" onclick="window.location.reload()">
                             Restart
                         </button>
@@ -118,10 +114,7 @@ async function main() {
                 }
             }
         } else {
-            stateObj.resultDiv.innerHTML =
-                `<p class="fw-bold text-info">
-                I'm afraid there is no such word as ${word} in this board.
-            </p>`;
+            showResultMessage(`I'm afraid there is no such word as ${word} in this board.`);
         }
 
         // Reset
@@ -132,45 +125,12 @@ async function main() {
     });
 }
 
-async function generateContentFromAPI(rows, cols) {
-    const url = '/api/generate-content-' + rows + '-' + cols;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-
-        const json = await response.json();
-        return json;
-    } catch (error) {
-        console.error(error.message);
-    }
-}
-
-async function getWordsInBoardFromAPI() {
-    const url = '/api/get-words-in-board';
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-
-        const json = await response.json();
-        return json;
-    } catch (error) {
-        console.error(error.message);
-    }
-}
-
 async function generateBoard() {
     stateObj.board = document.querySelector('#board');
     stateObj.content = await generateContentFromAPI(stateObj.rows, stateObj.cols);
 
     if (!stateObj.content || !stateObj.board) {
-        stateObj.resultDiv.innerHTML = 
-        `<p class="text-danger">
-            Failed to generate board. Try again.
-        </p>`;
+        showResultMessage('Failed to generate board. Try again.', 'text-danger');
         return;
     }
 
@@ -205,10 +165,7 @@ async function generateBoard() {
                         spanCol.classList.remove('selected');
                         stateObj.selectedElems.pop();
                     } else {
-                        stateObj.resultDiv.innerHTML =
-                            `<p class="fw-bold text-info">
-                                You can only deselect the last selected letter.
-                            </p>`;
+                        showResultMessage('You can only deselect the last selected letter.');
                     }
                 } else {
                     // First click is allowed unconditionally
@@ -222,16 +179,13 @@ async function generateBoard() {
                             stateObj.selectedElems.push(spanCol);
                         } else {
                             // Not adjacent
-                            stateObj.resultDiv.innerHTML =
-                                `<p class="fw-bold text-info">
-                                    You can only select adjacent letters.
-                                </p>`;
+                            showResultMessage('You can only select adjacent letters.');
                         }
                     }
                 }
 
                 // Enable/disable check button
-                stateObj.checkWordBtn.disabled = stateObj.selectedElems.length < 3;
+                stateObj.checkWordBtn.disabled = stateObj.selectedElems.length < stateObj.minWordLength;
             });
 
             divRow.appendChild(spanCol);
@@ -243,14 +197,35 @@ async function generateBoard() {
     stateObj.checkWordBtn.hidden = false;
 }
 
-function resetBoardState() {
-    stateObj.board.innerHTML = '';
-    stateObj.selectedElems = [];
-    stateObj.wordsInBoard = null;
-    stateObj.wordsFound = [];
-    stateObj.wordsFoundParagraph.innerHTML = '';
-    stateObj.resultDiv.innerHTML = '';
-    stateObj.checkWordBtn.disabled = true;
+async function generateContentFromAPI(rows, cols) {
+    const url = '/api/generate-content-' + rows + '-' + cols;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        const json = await response.json();
+        return json;
+    } catch (error) {
+        console.error(error.message);
+        showResultMessage('Could not fetch data from API.', 'text-danger');
+    }
+}
+
+async function getWordsInBoardFromAPI() {
+    const url = '/api/get-words-in-board';
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        const json = await response.json();
+        return json;
+    } catch (error) {
+        showResultMessage('Could not fetch data from API.', 'text-danger');
+    }
 }
 
 function isAdjacent(a, b) {
@@ -265,6 +240,20 @@ function isAdjacent(a, b) {
 
     // Adjacent only if rowDiff <= 1 and colDiff <= 1 and they're not equal
     return rowDiff <= 1 && colDiff <= 1 && !(rowA == rowB && colA == colB);
+}
+
+function resetBoardState() {
+    stateObj.board.innerHTML = '';
+    stateObj.selectedElems = [];
+    stateObj.wordsInBoard = null;
+    stateObj.wordsFound = [];
+    stateObj.wordsFoundElem.innerHTML = '';
+    stateObj.resultElem.innerHTML = '';
+    stateObj.checkWordBtn.disabled = true;
+}
+
+function showResultMessage(message, classes='text-info') {
+    stateObj.resultElem.innerHTML = `<p class="${classes}">${message}</p>`;
 }
 
 document.addEventListener('DOMContentLoaded', main);
