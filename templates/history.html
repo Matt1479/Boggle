@@ -5,5 +5,26 @@
 {% endblock %}
 
 {% block main %}
-    <p>TODO</p>
+    {% if history %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="text-start">#</th>
+                    <th class="text-start">Chain</th>
+                    <th class="text-end">Date / Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in history %}
+                    <tr>
+                        <td class="text-start">{{ row.id }}</td>
+                        <td class="text-start">{{ row.chain }}</td>
+                        <td class="text-end">{{ row.date_time }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nothing yet!</p>
+    {% endif %}
 {% endblock %}
