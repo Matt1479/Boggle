@@ -5,5 +5,51 @@
 {% endblock %}
 
 {% block main %}
-    <p>TODO</p>
+    <div class="row justify-content-center align-items-center mb-3">
+
+        <div class="col-2"></div>
+
+        <div class="col-8">
+
+            <form action="/dictionary" method="post">
+                <input autocomplete="off" autofocus class="form-control mb-3"
+                    name="word" placeholder="Type in a word" type="text">
+                <button type="submit" class="btn btn-primary mb-3">Check meaning</button>
+            </form>
+
+        </div>
+
+        <div class="col-2"></div>
+    </div>
+
+    {% if message %}
+        <div class="row justify-content-start align-items-start">
+
+            <div class="col-2"></div>
+
+            <div class="col-8 text-start">
+
+                <h2 class="text-center">{{ message["word"] | title() }}</h2>
+
+                {% for meaning in message["meanings"] %}
+                    <ol class="list-group list-group-numbered mb-3">
+                        <h4>Definitions ({{ meaning["partOfSpeech"] }})</h4>
+                        {% for definition in meaning["definitions"] %}
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    {{ definition }}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% endfor %}
+
+                <p>Source{{ "s" if message["sourceUrls"] | length > 1 else "" }}: {{ message["sourceUrls"] | join(", ") }}</p>
+
+            </div>
+
+            <div class="col-2"></div>
+
+        </div>
+    {% endif %}
 {% endblock %}

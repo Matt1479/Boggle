@@ -1,4 +1,5 @@
 import random
+import requests
 from string import ascii_uppercase, ascii_lowercase
 
 # Initialize pseudo-random number generator
@@ -56,3 +57,28 @@ def generate_board(rows=4, cols=4, uppercase=True, min_vowel_ratio=0.25):
         "rows": rows,
         "cols": cols
     }
+
+
+def unpack(url, word):
+    response = requests.get(f"{url}/{word}")
+    if response.ok:
+        response_json = response.json()[0]
+
+        # Unpack
+        out = {
+            "meanings": [],
+            "sourceUrls": response_json["sourceUrls"],
+            "word": response_json["word"]
+        }
+        for meaning in response_json["meanings"]:
+            out["meanings"].append({
+                "definitions": [
+                    definition["definition"]
+                    for definition in meaning["definitions"]
+                ],
+                "partOfSpeech": meaning["partOfSpeech"],
+            })
+
+        return out
+    else:
+        return None
