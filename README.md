@@ -88,21 +88,21 @@ Note: You will need to store your dictionaries (lists of dictionary words) insid
 
 ### Examples (Screenshots)
 
-<img src="screenshots/0.png" alt="Example 0: Home page" width="400">  
-<img src="screenshots/1.png" alt="Example 1: Home page - Generate board (dimensions)" width="400">  
-<img src="screenshots/2.png" alt="Example 2: Home page - Generate board (dimensions - custom)" width="400">  
-<img src="screenshots/3.png" alt="Example 3: Home page - Generate board" width="400">  
-<img src="screenshots/4.png" alt="Example 4: Home page - Select letters to form a word" width="400">  
-<img src="screenshots/5.png" alt="Example 5: Home page - Word validation - check if word is in board" width="400">  
-<img src="screenshots/6.png" alt="Example 6: Home page - Display all words" width="400">  
-<img src="screenshots/6.5.png" alt="Example 6.5: Home page - Hide all words" width="400">  
-<img src="screenshots/7.png" alt="Example 7: Home page - Display all words" width="400">  
-<img src="screenshots/8.png" alt="Example 8: Home page - Display all words (hover)" width="400">  
-<img src="screenshots/9.png" alt="Example 9: Dictionary - Redirected from home page via click on word" width="400">  
-<img src="screenshots/10.png" alt="Example 10: Dictionary - Type in a word to check its meaning" width="400">  
-<img src="screenshots/11.png" alt="Example 11: Dictionary - Type in a word to check its meaning" width="400">  
-<img src="screenshots/12.png" alt="Example 12: History - View game history" width="400">  
-<img src="screenshots/13.png" alt="Example 13: Home page - Fetch board from session" width="400">
+<img src="screenshots/0.png" alt="Example 0: Home page">  
+<img src="screenshots/1.png" alt="Example 1: Home page - Generate board (dimensions)">  
+<img src="screenshots/2.png" alt="Example 2: Home page - Generate board (dimensions - custom)">  
+<img src="screenshots/3.png" alt="Example 3: Home page - Generate board">  
+<img src="screenshots/4.png" alt="Example 4: Home page - Select letters to form a word">  
+<img src="screenshots/5.png" alt="Example 5: Home page - Word validation - check if word is in board">  
+<img src="screenshots/6.png" alt="Example 6: Home page - Display all words">  
+<img src="screenshots/6.5.png" alt="Example 6.5: Home page - Hide all words">  
+<img src="screenshots/7.png" alt="Example 7: Home page - Display all words">  
+<img src="screenshots/8.png" alt="Example 8: Home page - Display all words (hover)">  
+<img src="screenshots/9.png" alt="Example 9: Dictionary - Redirected from home page via click on word">  
+<img src="screenshots/10.png" alt="Example 10: Dictionary - Type in a word to check its meaning">  
+<img src="screenshots/11.png" alt="Example 11: Dictionary - Type in a word to check its meaning">  
+<img src="screenshots/12.png" alt="Example 12: History - View game history">  
+<img src="screenshots/13.png" alt="Example 13: Home page - Fetch board from session">
 
 ## Tech Stack
 
