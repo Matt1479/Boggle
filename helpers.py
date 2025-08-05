@@ -59,7 +59,7 @@ def generate_board(rows=4, cols=4, uppercase=True, min_vowel_ratio=0.25):
     }
 
 
-def get_chain(rows: int, cols: int, board: []):
+def get_chain(rows: int, cols: int, board: list):
     
     if not board:
         return None
