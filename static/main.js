@@ -40,6 +40,15 @@ async function main() {
     stateObj.displayBtn = document.querySelector('#display > button');
     stateObj.wordsElem = document.querySelector('#words');
 
+    // Try to get content from API/session
+    stateObj.content = await getDataFromAPI('/api/get-content');
+    if (stateObj.content.Error) {
+        stateObj.content = null;
+    } else {
+        // Generate board, passing in content from API/session
+        await generateBoard(stateObj.content);
+    }
+
     // Initialize/instantiate modals
     stateObj.generateModalElem = new bootstrap.Modal('#generateModal');
     stateObj.dimensionsModalElem = new bootstrap.Modal('#dimensionsModal');
@@ -97,7 +106,7 @@ async function main() {
         }
 
         if (!stateObj.wordsInBoard) {
-            stateObj.wordsInBoard = new Set(await getWordsInBoardFromAPI());
+            stateObj.wordsInBoard = new Set(await getDataFromAPI('/api/get-words-in-board'));
         }
 
         if (stateObj.wordsInBoard.has(word)) {
@@ -136,7 +145,7 @@ async function main() {
         // Immediataly disable to avoid successive calls/clicking
         stateObj.displayBtn.disabled = true;
         if (!stateObj.wordsInBoard) {
-            stateObj.wordsInBoard = new Set(await getWordsInBoardFromAPI());
+            stateObj.wordsInBoard = new Set(await getDataFromAPI('/api/get-words-in-board'));
         }
 
         // When done fetching change display text and toggle the button
@@ -188,9 +197,9 @@ async function main() {
     });
 }
 
-async function generateBoard() {
+async function generateBoard(content = null) {
     stateObj.board = document.querySelector('#board');
-    stateObj.content = await generateContentFromAPI(stateObj.rows, stateObj.cols);
+    stateObj.content = content ? content : await generateContentFromAPI(stateObj.rows, stateObj.cols);
 
     if (!stateObj.content || !stateObj.board) {
         showResultMessage('Failed to generate board. Try again.', 'text-danger');
@@ -276,8 +285,7 @@ async function generateContentFromAPI(rows, cols) {
     }
 }
 
-async function getWordsInBoardFromAPI() {
-    const url = '/api/get-words-in-board';
+async function getDataFromAPI(url) {
     try {
         const response = await fetch(url);
         if (!response.ok) {
