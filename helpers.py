@@ -59,6 +59,19 @@ def generate_board(rows=4, cols=4, uppercase=True, min_vowel_ratio=0.25):
     }
 
 
+def get_chain(rows: int, cols: int, board: []):
+    
+    if not board:
+        return None
+
+    chain = ""
+    for i in range(rows):
+        for j in range(cols):
+            chain += board[i][j]
+    
+    return chain
+
+
 def unpack(url, word):
     response = requests.get(f"{url}/{word}")
     if response.ok:
