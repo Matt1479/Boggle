@@ -168,7 +168,7 @@ async function main() {
                         const a = document.createElement('a');
                         a.textContent = word.at(0).toUpperCase() + word.slice(1).toLowerCase();
                         a.classList.add('word', 'w-auto', 'btn', 'mx-1');
-                        // a.href = `/dictionary?word=${word}`;
+                        a.href = `/dictionary?word=${word}`;
 
                         groupContainer.appendChild(a); 
                     });

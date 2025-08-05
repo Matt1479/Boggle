@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, session
+from flask import Flask, flash, jsonify, request, render_template, session
 from flask_session import Session
 import boggle
 import helpers
@@ -53,8 +53,20 @@ def api_get_words_in_board():
         session["content"]["cols"], G_WORDS))
 
 
-@app.route("/dictionary")
+@app.route("/dictionary", methods=["GET", "POST"])
 def dictionary():
+    if request.method == "POST":
+        word = request.form.get("word")
+    else:
+        word = request.args.get("word")
+    
+    if word:
+        out = helpers.unpack("https://api.dictionaryapi.dev/api/v2/entries/en", word)
+        if out:
+            return render_template("dictionary.html", message=out)
+        else:
+            flash(f"Sorry, the word {word} is not in dictionary.")
+
     return render_template("dictionary.html")
 
 
