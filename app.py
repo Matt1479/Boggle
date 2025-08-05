@@ -1,7 +1,7 @@
 import boggle
 from datetime import datetime
 import db_utils # SQLite3: Connect on demand
-from flask import Flask, flash, g, jsonify, request, render_template, session
+from flask import Flask, flash, g, jsonify, redirect, request, render_template, session
 from flask_session import Session
 import helpers
 import logging
@@ -77,12 +77,26 @@ def api_generate_content(rows, cols):
 
 @app.route("/api/get-words-in-board")
 def api_get_words_in_board():
-    if not session["content"]:
+    if not session.get("content"):
         return jsonify({"Error": "No content."})
     
     return jsonify(boggle.word_boggle(
         session["content"]["board"], session["content"]["rows"],
         session["content"]["cols"], G_WORDS))
+
+
+@app.route("/api/get-content")
+def api_get_content():
+    if not session.get("content"):
+        return jsonify({"Error": "No content."})
+    
+    return jsonify(session.get("content"))
+
+
+@app.route("/clear-session")
+def clear_session():
+    session.clear()
+    return redirect("/")
 
 
 @app.route("/dictionary", methods=["GET", "POST"])
